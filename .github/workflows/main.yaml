@@ -11,39 +11,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+    name: Unit tests
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-        
-    - name: Install uv
-      uses: astral-sh/setup-uv@v5
-      with:
-        enable-cache: true
-    
-    - name: Install dependencies
-      run: |
-        uv pip install -e ".[dev]"
-        # If you don't have a dev extra, use this instead:
-        # uv pip install -e .
-        # uv pip install pytest pytest-cov
-        
-    - name: Run tests
-      run: |
-        pytest --junitxml=junit-reports/test-results.xml
-        
-    - name: Test Report
-      uses: dorny/test-reporter@v2
-      if: success() || failure()    # run this step even if previous step failed
-      with:
-        name: Pytest Results
-        path: junit-reports/test-results.xml
-        reporter: pytest-junit
-  
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - id: run-tests
+        uses: dima-engineer/pytest-reporter@v3
+        with:
+          cov-omit-list: tests/*
+          async-tests: true
+
   build-and-release:
     needs: test
     if: github.event_name == 'release' && github.event.action == 'created'
