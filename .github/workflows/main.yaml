@@ -1,0 +1,76 @@
+name: Python Tests and Release
+
+on:
+  push:
+    branches: [ main, workflow ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+    
+    - name: Install dependencies
+      run: |
+        uv pip install -e ".[dev]"
+        # If you don't have a dev extra, use this instead:
+        # uv pip install -e .
+        # uv pip install pytest pytest-cov
+        
+    - name: Run tests
+      run: |
+        pytest --junitxml=junit-reports/test-results.xml
+        
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: success() || failure()    # run this step even if previous step failed
+      with:
+        name: Pytest Results
+        path: junit-reports/test-results.xml
+        reporter: pytest-junit
+  
+  build-and-release:
+    needs: test
+    if: github.event_name == 'release' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+      
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+    
+    - name: Build package
+      run: |
+        uv build --no-sources
+        
+    - name: Upload build artifacts to release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
