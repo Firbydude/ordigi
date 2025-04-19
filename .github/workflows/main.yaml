@@ -22,6 +22,7 @@ jobs:
         with:
           cov-omit-list: tests/*
           async-tests: true
+          uv-version: 0.6.11
 
   build-and-release:
     needs: test
