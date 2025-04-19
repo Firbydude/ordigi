@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.12'
       - id: run-tests
-        uses: dima-engineer/pytest-reporter@v3
+        uses: dima-engineer/pytest-reporter@v4
         with:
           cov-omit-list: tests/*
           async-tests: true
