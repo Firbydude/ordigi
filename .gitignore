@@ -17,3 +17,5 @@ generated-client/
 *.log
 
 .env
+.cursor
+ordigi-server.zsh
