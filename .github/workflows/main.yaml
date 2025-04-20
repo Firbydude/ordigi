@@ -1,0 +1,56 @@
+name: Python Tests and Release
+
+on:
+  push:
+    branches: [ main, workflow ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Unit tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - id: run-tests
+        uses: dima-engineer/pytest-reporter@v4
+        with:
+          cov-omit-list: tests/*
+          async-tests: true
+          uv-version: 0.6.11
+
+  build-and-release:
+    needs: test
+    if: github.event_name == 'release' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+      
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+    
+    - name: Build package
+      run: |
+        uv build --no-sources
+        
+    - name: Upload build artifacts to release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
