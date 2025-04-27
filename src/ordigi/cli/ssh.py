@@ -313,8 +313,3 @@ ssh_cli.add_command(shell)
 
 ssh_cli.add_command(put_file)
 ssh_cli.add_command(get_file)
-
-
-if __name__ == "__main__":
-    # Use asyncio.run to run the async click command
-    asyncio.run(ssh_cli(_anyio_backend="asyncio"))
