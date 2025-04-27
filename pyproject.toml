@@ -17,6 +17,8 @@ dependencies = [
     "python-multipart>=0.0.20",
     "dotenv>=0.9.9",
 ]
+license = "MIT"
+license-files = ["LICESNSE.txt"]
 
 [project.scripts]
 ordigi = "ordigi.cli:cli"
