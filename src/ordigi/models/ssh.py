@@ -121,3 +121,7 @@ class SessionModel(BaseModel):
         default=False,
         title="Whether the SSH session is currently connected",
     )
+    enable_compression: bool = Field(
+        default=False,
+        title="Whether compression is enabled for the SSH connection",
+    )

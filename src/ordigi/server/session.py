@@ -62,6 +62,7 @@ async def session_post(
         session.local_key_path,
         session.local_key_passphrase,
         proxy_command,
+        session.enable_compression,
     )
 
     ordigi.sessions[session_id] = ssh_session

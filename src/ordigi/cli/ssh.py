@@ -40,6 +40,7 @@ def ssh_cli(ctx):
     help="Proxy command (only 'corkscrew' supported)",
     default=None,
 )
+@click.option("--enable-compression", is_flag=True, help="Enable compression")
 @click.option("--session-id", help="Custom session ID (optional)")
 @click.pass_context
 @handle_client_errors
@@ -51,6 +52,7 @@ def connect(
     key_path: Optional[str],
     passphrase: bool,
     proxy: Optional[Literal["corkscrew"]],
+    enable_compression: bool,
     session_id: Optional[str],
 ):
     """
@@ -90,6 +92,7 @@ def connect(
         local_key_path=key_path,
         local_key_passphrase=key_passphrase,
         proxy_command=proxy,
+        enable_compression=enable_compression,
         port_forwards=[],  # Empty initially
     )
 
@@ -112,7 +115,15 @@ def list_sessions(ctx):
         return
 
     # Prepare table data
-    headers = ["ID", "User", "Host", "Port", "Connected", "Port Forwards"]
+    headers = [
+        "ID",
+        "User",
+        "Host",
+        "Port",
+        "Connected",
+        "Compression",
+        "Port Forwards",
+    ]
     table_data = []
 
     for session in sessions:
@@ -124,6 +135,7 @@ def list_sessions(ctx):
                 session.remote_host,
                 session.remote_port,
                 session.is_connected,
+                session.enable_compression,
                 fwps,
             ]
         )

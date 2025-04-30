@@ -4,7 +4,7 @@ import logging
 from asyncio import Task
 from ipaddress import IPv4Address
 from pathlib import Path
-from typing import IO, Any, Dict, Iterator, Optional, Protocol, Tuple, Union
+from typing import IO, Dict, Iterator, Optional, Protocol, Tuple, Union
 
 import paramiko
 import paramiko.auth_strategy
@@ -350,14 +350,15 @@ class ParamikoSession:
     """Wrapper around Paramiko Connection object with added functionality.
 
     Args:
-        name (str): The name of the tunnel.
-        local_host (str | IPv4Address, optional): The local host to bind the tunnel to. Defaults to "localhost".
+        name (str): The name of the session.
+        remote_user (str | None, optional): The remote user to connect as. Defaults to None.
         remote_host (str | IPv4Address): The remote host to connect to.
         remote_port (int | None): The remote port to connect to.
-        remote_user (str | None, optional): The remote user to connect as. Defaults to None.
         remote_password (str | None, optional): The remote password to use for authentication. Defaults to None.
         local_key_path (str | None, optional): Path to the local SSH key file. Defaults to None.
         local_key_passphrase (str | None, optional): The passphrase for the local SSH key. Defaults to None.
+        proxy_sock (ProxySock | None, optional): The proxy socket to use for the connection. Defaults to None.
+        enable_compression (bool, optional): Whether to enable compression. Defaults to False.
     """
 
     def __init__(
@@ -370,11 +371,13 @@ class ParamikoSession:
         local_key_path: Optional[str] = None,
         local_key_passphrase: Optional[str] = None,
         proxy_sock: Optional[ProxySock] = None,
+        enable_compression: bool = False,
     ):
         self.name = name
         self.remote_host = str(remote_host)
         self.remote_port = remote_port or 22
         self.proxy_sock = proxy_sock
+        self.enable_compression = enable_compression
 
         self._task: Optional[Task] = None
         self._cond_connected = asyncio.Condition()
@@ -515,19 +518,9 @@ class ParamikoSession:
                 self._client = paramiko.SSHClient()
                 self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-                # Set up connection parameters
-                connect_kwargs: Dict[str, Any] = {
-                    "hostname": self.remote_host,
-                    "port": 22,  # Default SSH port
-                    # "username": self.remote_user,
-                    "timeout": 10,
-                    "auth_strategy": self._auth,
-                }
-
                 # Add proxy socket if provided
                 if self.proxy_sock:
                     self.proxy_sock.connect()
-                    connect_kwargs["sock"] = self.proxy_sock
 
                 logger.info(
                     f"Connecting to SSH tunnel: {self.remote_user}@{self.remote_host}"
@@ -542,6 +535,7 @@ class ParamikoSession:
                         timeout=10.0,
                         auth_strategy=self._auth,
                         sock=self.proxy_sock,  # type: ignore
+                        compress=self.enable_compression,
                     ),
                 )
 

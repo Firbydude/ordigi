@@ -165,6 +165,7 @@ class TestSessionModel:
             proxy_command="corkscrew",
             port_forwards=[port_forward],
             is_connected=True,
+            enable_compression=True,
         )
 
         assert model.id == "lab"
@@ -178,6 +179,7 @@ class TestSessionModel:
         assert len(model.port_forwards) == 1
         assert model.port_forwards[0].id == "test-forward"
         assert model.is_connected is True
+        assert model.enable_compression is True
 
     def test_valid_model_minimal(self):
         """Test creating a valid SessionModel with only required fields"""
@@ -196,6 +198,7 @@ class TestSessionModel:
         assert model.proxy_command is None  # Default value
         assert model.port_forwards == []  # Default value
         assert model.is_connected is False  # Default value
+        assert model.enable_compression is False  # Default value
 
     def test_invalid_remote_host(self):
         """Test validation error for invalid remote_host"""

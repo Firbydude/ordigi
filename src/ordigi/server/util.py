@@ -30,6 +30,7 @@ def session_to_model(session: ParamikoSession) -> SessionModel:
         proxy_command=(
             "corkscrew" if isinstance(session.proxy_sock, Corkscrew) else None
         ),
+        enable_compression=session.enable_compression,
         port_forwards=[port_forward_to_model(fwp) for fwp in session.forwarded_ports],
         is_connected=session.is_connected,
     )

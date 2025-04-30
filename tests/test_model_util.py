@@ -62,6 +62,7 @@ class TestSessionToModel:
         session.local_key_path = "/home/user/.ssh/id_rsa"
         session.proxy_sock = None
         session.is_connected = True
+        session.enable_compression = True
 
         # Create mock port forwards
         port_forward1 = MagicMock(spec=PortForward)
@@ -127,6 +128,7 @@ class TestSessionToModel:
         assert model.local_key_path == "/home/user/.ssh/id_rsa"
         assert model.proxy_command is None
         assert model.is_connected == True
+        assert model.enable_compression == True
         assert len(model.port_forwards) == 2
 
     def test_session_with_corkscrew_proxy(self):
@@ -139,6 +141,7 @@ class TestSessionToModel:
         session.local_key_path = None
         session.is_connected = False
         session.forwarded_ports = []
+        session.enable_compression = False
 
         # Mock a Corkscrew proxy
         corkscrew_mock = MagicMock(spec=Corkscrew)
@@ -159,6 +162,7 @@ class TestSessionToModel:
         session.remote_user = "otheruser"
         session.local_key_path = None
         session.is_connected = True
+        session.enable_compression = False
         session.forwarded_ports = []
 
         # Mock a non-Corkscrew proxy
